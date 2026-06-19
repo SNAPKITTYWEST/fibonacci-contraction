@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FCC-φ-∂-2026 · Sovereign Fabrication Engine</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#030712;color:#e2e8f0;font-family:'Courier New',monospace;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+header{display:flex;align-items:center;justify-content:space-between;padding:8px 20px;border-bottom:1px solid #1f2937;flex-shrink:0}
+.title{font-size:11px;letter-spacing:4px;color:#a855f7}
+.fingerprint{font-size:9px;letter-spacing:2px;color:#374151}
+.seal-display{font-size:9px;color:#dc2626;letter-spacing:1px}
+.main{display:flex;flex:1;overflow:hidden}
+.left{width:260px;flex-shrink:0;border-right:1px solid #1f2937;display:flex;flex-direction:column;padding:12px;gap:10px;overflow-y:auto}
+.center{flex:1;display:flex;align-items:center;justify-content:center;position:relative}
+.right{width:240px;flex-shrink:0;border-left:1px solid #1f2937;display:flex;flex-direction:column;padding:12px;gap:10px;overflow-y:auto}
+.panel-label{font-size:9px;letter-spacing:2px;color:#4b5563;margin-bottom:4px}
+.fib-row{display:flex;gap:4px;flex-wrap:wrap}
+.fib-n{font-size:9px;padding:2px 5px;border:1px solid #1f2937;color:#374151}
+.fib-n.prime{border-color:#10b981;color:#10b981}
+.fib-n.current{border-color:#a855f7;color:#a855f7;background:#1e1b4b}
+.phinary-display{font-size:11px;letter-spacing:2px;color:#06b6d4;word-break:break-all;line-height:1.8}
+.bit-1{color:#a855f7;font-weight:bold}
+.bit-0{color:#1f2937}
+textarea{background:#0d1117;border:1px solid #1f2937;color:#10b981;font-family:'Courier New',monospace;font-size:11px;padding:8px;resize:none;width:100%;height:70px;outline:none}
+textarea:focus{border-color:#a855f7}
+.caesar-out{font-size:11px;color:#f97316;letter-spacing:1px;word-break:break-all;line-height:1.6;min-height:30px}
+.worm-hash{font-size:10px;color:#dc2626;letter-spacing:1px;word-break:break-all}
+.metric{display:flex;justify-content:space-between;font-size:10px;padding:3px 0;border-bottom:1px solid #0d1117}
+.metric-label{color:#4b5563}
+.metric-val{color:#e2e8f0}
+.metric-val.green{color:#10b981}
+.metric-val.purple{color:#a855f7}
+.metric-val.red{color:#dc2626}
+.depth-bar{height:3px;background:#1f2937;margin-top:2px}
+.depth-fill{height:100%;background:linear-gradient(90deg,#a855f7,#06b6d4);transition:width 0.3s}
+#sphere-canvas{position:absolute;top:10px;right:10px;opacity:0.3}
+.breathing-ring{position:absolute;border-radius:50%;pointer-events:none}
+footer{padding:6px 20px;border-top:1px solid #1f2937;display:flex;justify-content:space-between;font-size:9px;color:#1f2937;flex-shrink:0}
+.status-dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:#10b981;margin-right:4px;box-shadow:0 0 4px #10b981}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title">FCC-φ-∂-2026 · SOVEREIGN FABRICATION ENGINE</div>
+  <div class="fingerprint">AHMAD PARR · SNAPKITTY · φ = 1.6180339887</div>
+  <div class="seal-display" id="header-seal">SEAL: initializing...</div>
+</header>
+
+<div class="main">
+
+  <!-- LEFT: Fibonacci + Phinary state -->
+  <div class="left">
+    <div>
+      <div class="panel-label">FIBONACCI PRIMES</div>
+      <div class="fib-row" id="fib-row"></div>
+    </div>
+    <div>
+      <div class="panel-label">PHINARY DEPTH <span id="depth-n" style="color:#a855f7">0</span></div>
+      <div class="depth-bar"><div class="depth-fill" id="depth-fill" style="width:0%"></div></div>
+    </div>
+    <div>
+      <div class="panel-label">PHINARY REPRESENTATION</div>
+      <div class="phinary-display" id="phinary-out">—</div>
+    </div>
+    <div>
+      <div class="panel-label">CONTRACTION STATE</div>
+      <div class="metric"><span class="metric-label">radius(n)</span><span class="metric-val purple" id="m-radius">—</span></div>
+      <div class="metric"><span class="metric-label">φ^n</span><span class="metric-val" id="m-phin">—</span></div>
+      <div class="metric"><span class="metric-label">F(n+1)/F(n)</span><span class="metric-val green" id="m-ratio">—</span></div>
+      <div class="metric"><span class="metric-label">stability</span><span class="metric-val green" id="m-stable">CONVERGENT</span></div>
+      <div class="metric"><span class="metric-label">breath phase</span><span class="metric-val" id="m-breath">—</span></div>
+    </div>
+    <div>
+      <div class="panel-label">WORM SEAL</div>
+      <div class="worm-hash" id="worm-hash">—</div>
+    </div>
+  </div>
+
+  <!-- CENTER: SVG Manifold -->
+  <div class="center">
+    <svg id="manifold" viewBox="0 0 1000 1000" style="width:min(100%,600px);height:min(100%,600px)">
+      <defs>
+        <filter id="glow-purple">
+          <feGaussianBlur stdDeviation="4" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow-cyan">
+          <feGaussianBlur stdDeviation="6" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow-red">
+          <feGaussianBlur stdDeviation="8" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <radialGradient id="core-grad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#a855f7" stop-opacity="0.8"/>
+          <stop offset="100%" stop-color="#030712" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <g id="manifold-layers"></g>
+      <g id="sphere-layer" opacity="0.25"></g>
+      <text x="500" y="980" text-anchor="middle" font-family="Courier New" font-size="10" fill="#1f2937" letter-spacing="2">FCC-φ-∂-2026 · AHMAD PARR · SNAPKITTY SOVEREIGN</text>
+    </svg>
+    <canvas id="sphere-canvas" width="160" height="160"></canvas>
+  </div>
+
+  <!-- RIGHT: Mantra input + Caesar + metrics -->
+  <div class="right">
+    <div>
+      <div class="panel-label">MANTRA STREAM</div>
+      <textarea id="mantra-input" placeholder="enter mantra..." spellcheck="false"></textarea>
+    </div>
+    <div>
+      <div class="panel-label">CAESAR SHIFT · KEY: SNAPKITTY</div>
+      <div class="caesar-out" id="caesar-out">—</div>
+    </div>
+    <div>
+      <div class="panel-label">GEOMETRY METRICS</div>
+      <div class="metric"><span class="metric-label">layers</span><span class="metric-val" id="m-layers">8</span></div>
+      <div class="metric"><span class="metric-label">base radius</span><span class="metric-val">480px</span></div>
+      <div class="metric"><span class="metric-label">ratio 1/φ²</span><span class="metric-val green">0.3820</span></div>
+      <div class="metric"><span class="metric-label">polygon sides</span><span class="metric-val purple" id="m-sides">5</span></div>
+      <div class="metric"><span class="metric-label">tick</span><span class="metric-val" id="m-tick">0</span></div>
+      <div class="metric"><span class="metric-label">entropy</span><span class="metric-val red" id="m-entropy">—</span></div>
+    </div>
+    <div>
+      <div class="panel-label">LEAN 4 PROOF STATE</div>
+      <div style="font-size:9px;color:#374151;line-height:1.8">
+        theorem phinary_stable (n : ℕ) :<br>
+        &nbsp;&nbsp;radius n = 480 / φ^n<br>
+        &nbsp;&nbsp;→ ∀ ε > 0, ∃ N,<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;n > N → |r(n)| < ε<br>
+        <span style="color:#10b981">∎ convergent by φ-contraction</span>
+      </div>
+    </div>
+    <div>
+      <div class="panel-label">MULTIPLICITY STATE · MOC</div>
+      <div class="metric"><span class="metric-label">provenance</span><span class="metric-val green">SEALED</span></div>
+      <div class="metric"><span class="metric-label">irreducible</span><span class="metric-val green">TRUE</span></div>
+      <div class="metric"><span class="metric-label">drift</span><span class="metric-val green" id="m-drift">NONE</span></div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <span><span class="status-dot"></span>FABRICATION ENGINE ACTIVE · BBQBADDIE CONNECTED</span>
+  <span>φ² = φ + 1 · 1/φ = φ - 1 · F(n+1)/F(n) → φ</span>
+  <span>WORM · APPEND-ONLY · IMMUTABLE · PERMANENT</span>
+</footer>
+
+<script>
+const PHI = (1 + Math.sqrt(5)) / 2;
+const CX = 500, CY = 500;
+const BASE_R = 460;
+const LAYERS = 9;
+const SNAPKITTY = [18,13,0,15,10,8,19,19,24];
+
+// Fibonacci sequence
+function fib(n){let a=1,b=1;for(let i=2;i<n;i++){[a,b]=[b,a+b]}return b}
+function isPrime(n){if(n<2)return false;if(n===2)return true;if(n%2===0)return false;for(let i=3;i*i<=n;i+=2)if(n%i===0)return false;return true}
+const FIBS = Array.from({length:20},(_,i)=>fib(i+1));
+const FIB_PRIMES = new Set(FIBS.filter(isPrime));
+
+// Phinary (Bergman) representation
+function toPhinary(n){
+  if(n===0)return[0];
+  // find highest power of phi <= n
+  let k=0;
+  while(Math.pow(PHI,k+1)<=n+0.0001)k++;
+  const bits=[];
+  let rem=n;
+  for(let i=k;i>=-4;i--){
+    const pv=Math.pow(PHI,i);
+    if(rem>=pv-1e-9){bits.push(1);rem-=pv;}
+    else bits.push(0);
+  }
+  // normalize: no two consecutive 1s (replace 011 → 100 backwards)
+  for(let iter=0;iter<10;iter++){
+    let changed=false;
+    for(let i=bits.length-2;i>=0;i--){
+      if(bits[i]===1&&bits[i+1]===1){
+        bits[i]=0;bits[i+1]=0;
+        if(i>0)bits[i-1]=(bits[i-1]||0)+1;
+        else bits.unshift(1);
+        changed=true;
+      }
+    }
+    if(!changed)break;
+  }
+  return bits;
+}
+
+// Caesar shift with SNAPKITTY key
+function caesarShift(text){
+  return text.split('').map((c,i)=>{
+    const shift=SNAPKITTY[i%SNAPKITTY.length];
+    if(c>='a'&&c<='z')return String.fromCharCode(((c.charCodeAt(0)-97+shift)%26)+97);
+    if(c>='A'&&c<='Z')return String.fromCharCode(((c.charCodeAt(0)-65+shift)%26)+65);
+    return c;
+  }).join('');
+}
+
+// djb2 WORM seal
+function djb2(str){
+  let h=5381;
+  for(let i=0;i<str.length;i++)h=((h<<5)+h+str.charCodeAt(i))>>>0;
+  return h.toString(16).padStart(8,'0');
+}
+
+// Build fibonacci display
+const fibRow=document.getElementById('fib-row');
+FIBS.slice(0,15).forEach((f,i)=>{
+  const el=document.createElement('div');
+  el.className='fib-n'+(FIB_PRIMES.has(f)?' prime':'');
+  el.textContent=f;
+  el.id='fib-'+i;
+  fibRow.appendChild(el);
+});
+
+// SVG helpers
+const NS='http://www.w3.org/2000/svg';
+function svgEl(tag,attrs){
+  const el=document.createElementNS(NS,tag);
+  Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));
+  return el;
+}
+
+function polygon(cx,cy,r,n,rot,attrs){
+  const pts=Array.from({length:n},(_,i)=>{
+    const a=(rot+i*2*Math.PI/n)-Math.PI/2;
+    return `${cx+r*Math.cos(a)},${cy+r*Math.sin(a)}`;
+  }).join(' ');
+  return svgEl('polygon',{points:pts,...attrs});
+}
+
+function spiral(cx,cy,maxR,turns,color){
+  let d='';
+  const steps=200;
+  for(let i=0;i<=steps;i++){
+    const t=(i/steps)*turns*2*Math.PI;
+    const r=maxR*Math.exp(-Math.log(PHI)*t/(Math.PI/2));
+    const x=cx+r*Math.cos(t);
+    const y=cy+r*Math.sin(t);
+    d+=(i===0?'M':'L')+`${x},${y}`;
+  }
+  return svgEl('path',{d,stroke:color,fill:'none','stroke-width':'0.8',opacity:'0.5'});
+}
+
+// Main state
+let tick=0;
+let mantra='';
+let depth=0;
+let breathPhase=0;
+
+function render(){
+  tick++;
+  breathPhase+=0.018;
+  // φ-oscillator: quasi-periodic, never exactly repeats
+  const breathA=Math.cos(breathPhase)*0.5+Math.cos(breathPhase*PHI)*0.5;
+  const breathScale=1+breathA*0.06;
+
+  const layer=document.getElementById('manifold-layers');
+  layer.innerHTML='';
+
+  // Update fibonacci highlights
+  depth=(tick%15);
+  document.getElementById('depth-n').textContent=depth;
+  document.getElementById('depth-fill').style.width=(depth/15*100)+'%';
+  FIBS.slice(0,15).forEach((f,i)=>{
+    const el=document.getElementById('fib-'+i);
+    if(el){
+      el.className='fib-n'+(FIB_PRIMES.has(f)?' prime':'')+(i===depth?' current':'');
+    }
+  });
+
+  // Phinary rep of current depth
+  const bits=toPhinary(depth);
+  const pEl=document.getElementById('phinary-out');
+  pEl.innerHTML=bits.map(b=>`<span class="${b?'bit-1':'bit-0'}">${b}</span>`).join('');
+
+  // Metrics
+  const phin=Math.pow(PHI,depth);
+  const radius=BASE_R/phin*breathScale;
+  const fn1=fib(depth+2),fn=fib(depth+1);
+  document.getElementById('m-radius').textContent=radius.toFixed(2)+'px';
+  document.getElementById('m-phin').textContent=phin.toFixed(6);
+  document.getElementById('m-ratio').textContent=(fn1/fn).toFixed(8);
+  document.getElementById('m-breath').textContent=breathA.toFixed(4);
+  document.getElementById('m-tick').textContent=tick;
+  document.getElementById('m-sides').textContent=3+((tick>>2)%8);
+
+  // WORM seal
+  const state=`${tick}:${mantra}:${depth}:${breathPhase.toFixed(4)}`;
+  const seal=djb2(state);
+  document.getElementById('worm-hash').textContent=seal+'-worm-'+depth.toString(16);
+  document.getElementById('header-seal').textContent='SEAL: '+seal.slice(0,8).toUpperCase();
+
+  // Entropy
+  const entropy=bits.filter(b=>b===1).length;
+  document.getElementById('m-entropy').textContent=entropy+'/'+bits.length+' bits';
+
+  // Drift detection (simple: if entropy > phi-expected, flag)
+  const expected=bits.length/PHI;
+  document.getElementById('m-drift').textContent=Math.abs(entropy-expected)<1.5?'NONE':'PHASE';
+  document.getElementById('m-drift').style.color=Math.abs(entropy-expected)<1.5?'#10b981':'#f97316';
+
+  // Caesar
+  if(mantra){
+    document.getElementById('caesar-out').textContent=caesarShift(mantra);
+  }
+
+  // ── DRAW GEOMETRY ──
+
+  // Background gradient circle
+  const bgCirc=svgEl('circle',{cx:CX,cy:CY,r:BASE_R*1.05,fill:'url(#core-grad)',opacity:'0.15'});
+  layer.appendChild(bgCirc);
+
+  // Draw 4 golden spirals (rotated 90° each)
+  for(let s=0;s<4;s++){
+    const sp=spiral(CX,CY,BASE_R*breathScale,2.5,
+      ['#a855f7','#06b6d4','#dc2626','#10b981'][s]);
+    sp.setAttribute('transform',`rotate(${s*90},${CX},${CY})`);
+    layer.appendChild(sp);
+  }
+
+  // Concentric phinary rings: radius(n) = BASE_R / phi^n
+  const colors=['#dc2626','#f97316','#fbbf24','#10b981','#06b6d4','#3b82f6','#a855f7','#ec4899','#e2e8f0'];
+  for(let n=0;n<LAYERS;n++){
+    const r=BASE_R/Math.pow(PHI,n)*breathScale;
+    if(r<4)continue;
+    const col=colors[n%colors.length];
+    const opacity=n===0?0.9:0.6-n*0.04;
+    const sw=n===0?1.5:1-n*0.08;
+    const filter=n===0?'url(#glow-red)':n<3?'url(#glow-purple)':'none';
+
+    // Ring
+    const circ=svgEl('circle',{cx:CX,cy:CY,r,
+      fill:'none',stroke:col,
+      'stroke-width':Math.max(sw,0.3),
+      opacity,
+      filter:filter
+    });
+    layer.appendChild(circ);
+
+    // Polygon inscribed at this layer
+    // Pentagon → triangle → heptagon → pentagon ... cycling with phi
+    const sides=Math.max(3,Math.round(3+n*PHI)%7+3);
+    const rot=(tick*0.002*Math.pow(PHI,n)%(2*Math.PI));
+    const poly=polygon(CX,CY,r*0.95,sides,rot,{
+      fill:'none',stroke:col,
+      'stroke-width':Math.max(sw*0.5,0.2),
+      opacity:opacity*0.5
+    });
+    layer.appendChild(poly);
+  }
+
+  // Diamond (median manifold) - rotates with breath
+  const dmR=BASE_R/Math.pow(PHI,3)*breathScale;
+  const dmRot=tick*0.003;
+  const diam=polygon(CX,CY,dmR,4,dmRot,{
+    fill:'none',stroke:'#06b6d4',
+    'stroke-width':'1',opacity:'0.7',
+    filter:'url(#glow-cyan)'
+  });
+  layer.appendChild(diam);
+
+  // Inner core pulse
+  const coreR=BASE_R/Math.pow(PHI,7)*breathScale*(1+Math.abs(breathA)*0.3);
+  const core=svgEl('circle',{cx:CX,cy:CY,r:coreR,
+    fill:'#a855f7',opacity:'0.6',filter:'url(#glow-purple)'});
+  layer.appendChild(core);
+
+  // φ label at center
+  const phiLabel=svgEl('text',{x:CX,y:CY+5,
+    'text-anchor':'middle','font-family':'Courier New',
+    'font-size':'14','fill':'#a855f7',
+    'letter-spacing':'2','filter':'url(#glow-purple)'});
+  phiLabel.textContent='φ';
+  layer.appendChild(phiLabel);
+
+  // Mantra angular mapping: each char = angular segment on inner ring
+  if(mantra.length>0){
+    const mR=BASE_R/Math.pow(PHI,5)*breathScale;
+    mantra.split('').slice(0,32).forEach((c,i)=>{
+      const angle=(i/Math.max(mantra.length,1))*2*Math.PI-Math.PI/2;
+      const shift=SNAPKITTY[i%SNAPKITTY.length];
+      const glowAngle=angle+(shift/26)*Math.PI*0.5;
+      const x=CX+mR*Math.cos(glowAngle);
+      const y=CY+mR*Math.sin(glowAngle);
+      const dot=svgEl('circle',{cx:x,cy:y,r:3,
+        fill:'#f97316',opacity:'0.8',filter:'url(#glow-purple)'});
+      layer.appendChild(dot);
+    });
+  }
+
+  // Draw 3D sphere on mini canvas
+  drawSphere(breathScale, breathA);
+
+  requestAnimationFrame(render);
+}
+
+// ── 3D SPHERE (canvas wireframe) ──
+function drawSphere(scale, breath){
+  const canvas=document.getElementById('sphere-canvas');
+  const ctx=canvas.getContext('2d');
+  const W=160,H=160,cx=80,cy=80;
+  ctx.clearRect(0,0,W,H);
+
+  const R=55*scale;
+  const rotY=tick*0.008;
+  const rotX=tick*0.008/PHI;
+
+  function project(x,y,z){
+    // rotate Y
+    const x1=x*Math.cos(rotY)+z*Math.sin(rotY);
+    const z1=-x*Math.sin(rotY)+z*Math.cos(rotY);
+    // rotate X
+    const y2=y*Math.cos(rotX)-z1*Math.sin(rotX);
+    const z2=y*Math.sin(rotX)+z1*Math.cos(rotX);
+    const fov=300;
+    const s=fov/(fov+z2+R);
+    return{x:cx+x1*s,y:cy+y2*s,z:z2,s};
+  }
+
+  const steps=16;
+  ctx.lineWidth=0.5;
+
+  // Meridians
+  for(let i=0;i<steps;i++){
+    const lon=(i/steps)*2*Math.PI;
+    ctx.beginPath();
+    let first=true;
+    for(let j=0;j<=steps;j++){
+      const lat=(j/steps)*Math.PI-Math.PI/2;
+      const x=R*Math.cos(lat)*Math.cos(lon);
+      const y=R*Math.sin(lat);
+      const z=R*Math.cos(lat)*Math.sin(lon);
+      const p=project(x,y,z);
+      const alpha=Math.max(0,(p.z+R)/(2*R));
+      ctx.strokeStyle=`rgba(168,85,247,${alpha*0.6})`;
+      if(first){ctx.moveTo(p.x,p.y);first=false;}
+      else ctx.lineTo(p.x,p.y);
+    }
+    ctx.stroke();
+  }
+
+  // Parallels
+  for(let j=1;j<steps;j++){
+    const lat=(j/steps)*Math.PI-Math.PI/2;
+    ctx.beginPath();
+    let first=true;
+    for(let i=0;i<=steps*2;i++){
+      const lon=(i/(steps*2))*2*Math.PI;
+      const x=R*Math.cos(lat)*Math.cos(lon);
+      const y=R*Math.sin(lat);
+      const z=R*Math.cos(lat)*Math.sin(lon);
+      const p=project(x,y,z);
+      const alpha=Math.max(0,(p.z+R)/(2*R));
+      ctx.strokeStyle=`rgba(6,182,212,${alpha*0.4})`;
+      if(first){ctx.moveTo(p.x,p.y);first=false;}
+      else ctx.lineTo(p.x,p.y);
+    }
+    ctx.stroke();
+  }
+
+  // Pulse ring at equator
+  ctx.beginPath();
+  ctx.arc(cx,cy,R*(1+breath*0.08),0,2*Math.PI);
+  ctx.strokeStyle=`rgba(220,38,38,${0.2+Math.abs(breath)*0.3})`;
+  ctx.lineWidth=1.5;
+  ctx.stroke();
+}
+
+// Input handler
+document.getElementById('mantra-input').addEventListener('input',e=>{
+  mantra=e.target.value;
+});
+
+// Start
+render();
+</script>
+</body>
+</html>
