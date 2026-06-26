@@ -36,3 +36,5 @@ The answer is not what you expect.
 ## Fingerprint
 
 FCC-φ-∂-2026 — Ahmad Parr canonical. All derived work carries this mark.
+
+![](https://sovereign-analytics.snapkittywest.workers.dev/canary/fibonacci-contraction)
